@@ -3,15 +3,24 @@ Support for Airly air quality sensors
 """
 
 import asyncio
+from datetime import timedelta
 
 import aiohttp
 import async_timeout
 import homeassistant.helpers.config_validation as cv
 import voluptuous as vol
 from homeassistant.const import (
-    CONF_API_KEY, CONF_LATITUDE, CONF_LONGITUDE)
+    CONF_API_KEY, CONF_LATITUDE, CONF_LONGITUDE, ATTR_TEMPERATURE)
+from homeassistant.helpers.aiohttp_client import async_get_clientsession
 from homeassistant.helpers.config_validation import PLATFORM_SCHEMA
 from homeassistant.helpers.entity import Entity
+
+SCAN_INTERVAL = timedelta(minutes=5)
+
+ATTR_HUMIDITY = 'humidity'
+ATTR_PM10 = 'pm_10'
+ATTR_PM2_5 = 'pm_2_5'
+ATTR_PRESSURE = 'pressure'
 
 PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend({
     vol.Required(CONF_API_KEY): cv.string,
@@ -62,8 +71,9 @@ async def async_setup_platform(hass, config, async_add_entities, discovery_info=
     latitude = config.get(CONF_LATITUDE, hass.config.latitude)
     longitude = config.get(CONF_LONGITUDE, hass.config.longitude)
 
-    sensor = AirlySensor(AirlyClient(api_key))
-    async_add_entities([sensor])
+    client = AirlyClient(api_key, async_get_clientsession(hass))
+    sensor = AirlySensor(client)
+    async_add_entities([sensor], True)
 
 
 class AirlySensor(Entity):
@@ -74,6 +84,9 @@ class AirlySensor(Entity):
         self._state = None
         self._client = client
 
+        """ Update upon init """
+        self.update()
+
     @property
     def name(self):
         """Return the name of the sensor."""
@@ -82,6 +95,8 @@ class AirlySensor(Entity):
     @property
     def state(self):
         """Return the state of the sensor."""
+        if self._state is not None:
+            return self._state['current']['indexes'][0]['value']
         return self._state
 
     @property
@@ -95,7 +110,20 @@ class AirlySensor(Entity):
 
         attrs = {}
 
+        if self._state is not None:
+            current_values_ = self._state['current']['values']
+            attrs[ATTR_PRESSURE] = list(filter(self._prop("PRESSURE"), current_values_))[0]['value']
+            attrs[ATTR_HUMIDITY] = list(filter(self._prop("HUMIDITY"), current_values_))[0]['value']
+            attrs[ATTR_TEMPERATURE] = list(filter(self._prop("TEMPERATURE"), current_values_))[0]['value']
+            attrs[ATTR_PM2_5] = list(filter(self._prop("PM25"), current_values_))[0]['value']
+            attrs[ATTR_PM10] = list(filter(self._prop("PM10"), current_values_))[0]['value']
+
         return attrs
+
+    @staticmethod
+    def _prop(name):
+        """Adds filter for attribute related data"""
+        return lambda item: item['name'] == name
 
     async def update(self):
         """Fetch new state data for the sensor.
