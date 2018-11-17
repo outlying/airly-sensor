@@ -1,4 +1,6 @@
-from homeassistant.const import TEMP_CELSIUS
+"""
+Support for Airly air quality sensors
+"""
 from homeassistant.helpers.entity import Entity
 
 
@@ -17,7 +19,7 @@ class ExampleSensor(Entity):
     @property
     def name(self):
         """Return the name of the sensor."""
-        return 'Example Temperature'
+        return 'Air quality'
 
     @property
     def state(self):
@@ -27,7 +29,7 @@ class ExampleSensor(Entity):
     @property
     def unit_of_measurement(self):
         """Return the unit of measurement."""
-        return TEMP_CELSIUS
+        return 'CAQI'
 
     def update(self):
         """Fetch new state data for the sensor.
