@@ -72,17 +72,19 @@ async def async_setup_platform(hass, config, async_add_entities, discovery_info=
     longitude = config.get(CONF_LONGITUDE, hass.config.longitude)
 
     client = AirlyClient(api_key, async_get_clientsession(hass))
-    sensor = AirlySensor(client)
+    sensor = AirlySensor(client, longitude, latitude)
     async_add_entities([sensor], True)
 
 
 class AirlySensor(Entity):
     """Representation of a Airly sensor."""
 
-    def __init__(self, client):
+    def __init__(self, client, longitude, latitude):
         """Initialize the sensor."""
         self._state = None
         self._client = client
+        self._longitude = longitude
+        self._latitude = latitude
 
         """ Update upon init """
         self.update()
@@ -96,7 +98,7 @@ class AirlySensor(Entity):
     def state(self):
         """Return the state of the sensor."""
         if self._state is not None:
-            return self._state['current']['indexes'][0]['value']
+            return self._state[0]['current']['indexes'][0]['value']
         return self._state
 
     @property
@@ -111,7 +113,7 @@ class AirlySensor(Entity):
         attrs = {}
 
         if self._state is not None:
-            current_values_ = self._state['current']['values']
+            current_values_ = self._state[0]['current']['values']
             attrs[ATTR_PRESSURE] = list(filter(self._prop("PRESSURE"), current_values_))[0]['value']
             attrs[ATTR_HUMIDITY] = list(filter(self._prop("HUMIDITY"), current_values_))[0]['value']
             attrs[ATTR_TEMPERATURE] = list(filter(self._prop("TEMPERATURE"), current_values_))[0]['value']
@@ -130,4 +132,17 @@ class AirlySensor(Entity):
 
         This is the only method that should fetch new data for Home Assistant.
         """
-        self._state = await self._client.get_state()
+        self._state = await self._client.get_state(self._longitude, self._latitude)
+
+
+# client = AirlyClient("5e55f4d81bdf43478d8ac579827a59e4")
+# loop = asyncio.get_event_loop()
+# tasks = [client.get_state(50.039700, 19.927633)]
+# a = loop.run_until_complete(asyncio.gather(*tasks))
+# loop.close()
+#
+#
+# values = a[0]['current']['values']
+# print(values)
+# print(list(filter(AirlySensor._prop("HUMIDITY"), values))[0]['value'])
+
