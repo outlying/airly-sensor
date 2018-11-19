@@ -139,7 +139,7 @@ class AirlySensor(Entity):
 
         This is the only method that should fetch new data for Home Assistant.
         """
-        _LOGGER.debug("Getting state for (%s,%s)", self._longitude, self._latitude)
+        _LOGGER.error("Getting state for (%s,%s)", self._longitude, self._latitude)
         self._state = await self._client.get_state(self._longitude, self._latitude)
         _LOGGER.error(self._state)
 
