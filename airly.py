@@ -98,8 +98,12 @@ class AirlySensor(Entity):
     def state(self):
         """Return the state of the sensor."""
         if self._state is not None:
-            return self._state[0]['current']['indexes'][0]['value']
-        return self._state
+            try:
+                return self._state['current']['indexes'][0]['value']
+            except KeyError:
+                _LOGGER.error("Unable to access CAQI value from state")
+                return None
+        return None
 
     @property
     def unit_of_measurement(self):
