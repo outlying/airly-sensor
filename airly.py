@@ -124,8 +124,8 @@ class AirlySensor(Entity):
                 attrs[ATTR_TEMPERATURE] = list(filter(self._prop("TEMPERATURE"), current_values_))[0]['value']
                 attrs[ATTR_PM2_5] = list(filter(self._prop("PM25"), current_values_))[0]['value']
                 attrs[ATTR_PM10] = list(filter(self._prop("PM10"), current_values_))[0]['value']
-            except KeyError:
-                _LOGGER.error("Unable to set attributes")
+            except (KeyError, IndexError) as error:
+                _LOGGER.error("Unable to set attributes: {}".format(error))
 
         return attrs
 
