@@ -86,9 +86,6 @@ class AirlySensor(Entity):
         self._longitude = longitude
         self._latitude = latitude
 
-        """ Update upon init """
-        self.update()
-
     @property
     def name(self):
         """Return the name of the sensor."""
