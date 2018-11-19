@@ -117,7 +117,7 @@ class AirlySensor(Entity):
         attrs = {}
 
         if self._state is not None:
-            current_values_ = self._state[0]['current']['values']
+            current_values_ = self._state['current']['values']
             attrs[ATTR_PRESSURE] = list(filter(self._prop("PRESSURE"), current_values_))[0]['value']
             attrs[ATTR_HUMIDITY] = list(filter(self._prop("HUMIDITY"), current_values_))[0]['value']
             attrs[ATTR_TEMPERATURE] = list(filter(self._prop("TEMPERATURE"), current_values_))[0]['value']
