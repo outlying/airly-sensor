@@ -141,6 +141,7 @@ class AirlySensor(Entity):
         """
         _LOGGER.debug("Getting state for (%s,%s)", self._longitude, self._latitude)
         self._state = await self._client.get_state(self._longitude, self._latitude)
+        _LOGGER.error(self._state)
 
 
 # client = AirlyClient("5e55f4d81bdf43478d8ac579827a59e4")
