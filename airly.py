@@ -6,6 +6,7 @@ import asyncio
 from datetime import timedelta
 
 import aiohttp
+import logging
 import async_timeout
 import homeassistant.helpers.config_validation as cv
 import voluptuous as vol
@@ -14,6 +15,8 @@ from homeassistant.const import (
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
 from homeassistant.helpers.config_validation import PLATFORM_SCHEMA
 from homeassistant.helpers.entity import Entity
+
+_LOGGER = logging.getLogger(__name__)
 
 SCAN_INTERVAL = timedelta(minutes=5)
 
@@ -129,6 +132,7 @@ class AirlySensor(Entity):
 
         This is the only method that should fetch new data for Home Assistant.
         """
+        _LOGGER.debug("Getting state for (%s,%s)", self._longitude, self._latitude)
         self._state = await self._client.get_state(self._longitude, self._latitude)
 
 
