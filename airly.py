@@ -75,19 +75,19 @@ async def async_setup_platform(hass, config, async_add_entities, discovery_info=
     longitude = config.get(CONF_LONGITUDE, hass.config.longitude)
 
     client = AirlyClient(api_key, async_get_clientsession(hass))
-    sensor = AirlySensor(client, longitude, latitude)
+    sensor = AirlySensor(client, latitude, longitude)
     async_add_entities([sensor], True)
 
 
 class AirlySensor(Entity):
     """Representation of a Airly sensor."""
 
-    def __init__(self, client, longitude, latitude):
+    def __init__(self, client, latitude, longitude):
         """Initialize the sensor."""
         self._state = None
         self._client = client
-        self._longitude = longitude
         self._latitude = latitude
+        self._longitude = longitude
 
     @property
     def name(self):
@@ -139,8 +139,8 @@ class AirlySensor(Entity):
 
         This is the only method that should fetch new data for Home Assistant.
         """
-        _LOGGER.error("Getting state for (%s,%s)", self._longitude, self._latitude)
-        self._state = await self._client.get_state(self._longitude, self._latitude)
+        _LOGGER.error("Getting state for (%s,%s)", self._latitude, self._longitude)
+        self._state = await self._client.get_state(self._latitude, self._longitude)
         _LOGGER.error(self._state)
 
 
